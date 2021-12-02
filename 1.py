@@ -43,8 +43,12 @@ class SlidingWindow():
         return item
 
 
-if __name__ == '__main__':
+def main():
     file_name = '1.txt'
     data = sample
     data = [int(x) for x in shared.get_data(file_name)]
     print(increases(get_comparer(list(SlidingWindow(data)))))
+
+
+if __name__ == '__main__':
+    main()
