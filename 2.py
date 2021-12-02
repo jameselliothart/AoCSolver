@@ -16,6 +16,7 @@ sample = [
 class Position:
     horizontal: int
     depth: int
+    aim: int = 0
 
 
 def forward(position: Position, amount):
@@ -28,6 +29,21 @@ def down(position: Position, amount):
 
 def up(position: Position, amount):
     return replace(position, depth=position.depth - amount)
+
+
+def forward_(position: Position, amount):
+    return replace(
+        replace(position, horizontal=position.horizontal + amount),
+        depth=position.depth + (position.aim * amount)
+    )
+
+
+def down_(position: Position, amount):
+    return replace(position, aim=position.aim + amount)
+
+
+def up_(position: Position, amount):
+    return replace(position, aim=position.aim - amount)
 
 
 def position_number(position: Position):
@@ -47,9 +63,9 @@ def to_command(line):
 
 def move(position, command: Command):
     direction_to_fn = {
-        'forward': forward,
-        'up': up,
-        'down': down,
+        'forward': forward_,
+        'up': up_,
+        'down': down_,
     }
     fn = direction_to_fn[command.direction]
     return fn(position, command.amount)
