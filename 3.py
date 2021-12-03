@@ -1,5 +1,4 @@
 import os
-from functools import partial
 import shared
 
 sample = [
@@ -16,6 +15,10 @@ sample = [
     '00010',
     '01010',
 ]
+
+file_name = f'{os.path.basename(__file__).split(".")[0]}.txt'
+data = sample
+data = shared.get_data(file_name)
 
 
 def transpose(matrix):
@@ -40,9 +43,6 @@ def power_consumption(gamma_epsilon):
 
 
 def main():
-    file_name = f'{os.path.basename(__file__).split(".")[0]}.txt'
-    data = sample
-    data = shared.get_data(file_name)
     print(power_consumption(get_gamma_epsilon_binary(data)))
 
 
@@ -50,35 +50,40 @@ def sum_column(index, matrix):
     return sum(int(row[index]) for row in matrix)
 
 
-def criteria(comparer, bit_position, matrix):
-    column_length = len(matrix)
-    column_sum = sum_column(bit_position, matrix)
-    return (
-        [row for row in matrix if row[bit_position] == '1']
-        if comparer(column_sum, column_length)
-        else [row for row in matrix if row[bit_position] == '0']
-    )
+def new_criteria(comparer):
+    def criteria(bit_position, matrix):
+        column_length = len(matrix)
+        column_sum = sum_column(bit_position, matrix)
+        return (
+            [row for row in matrix if row[bit_position] == '1']
+            if comparer(column_sum, column_length)
+            else [row for row in matrix if row[bit_position] == '0']
+        )
+    return criteria
 
 
-def rating(criteria, matrix, bit_position):
-    [candidate, *others] = criteria(bit_position, matrix)
-    return candidate if len(others) == 0 else rating(criteria, [candidate] + others, bit_position + 1)
+def new_rater(criteria):
+    def rate(matrix, bit_position):
+        [candidate, *others] = criteria(bit_position, matrix)
+        return candidate if len(others) == 0 else rate([candidate] + others, bit_position + 1)
+    return rate
 
 
-oxygen_criteria = partial(criteria, lambda column_sum,
-                          column_length: column_sum >= column_length/2)
-oxygen_rating = partial(rating, oxygen_criteria)
-co2_criteria = partial(criteria, lambda column_sum,
-                       column_length: column_sum < column_length/2)
-co2_rating = partial(rating, co2_criteria)
+def life_support_rating(oxygen_rating, co2_rating):
+    return int(oxygen_rating, 2) * int(co2_rating, 2)
+
+
+oxygen_criteria = new_criteria(lambda column_sum,
+                               column_length: column_sum >= column_length/2)
+rate_oxygen = new_rater(oxygen_criteria)
+co2_criteria = new_criteria(lambda column_sum,
+                            column_length: column_sum < column_length/2)
+rate_co2 = new_rater(co2_criteria)
 
 
 def main2():
-    file_name = f'{os.path.basename(__file__).split(".")[0]}.txt'
-    data = sample
-    data = shared.get_data(file_name)
-    (oxygen, co2) = (oxygen_rating(data, 0), co2_rating(data, 0))
-    print(int(oxygen, 2) * int(co2, 2))
+    (oxygen, co2) = (rate_oxygen(data, 0), rate_co2(data, 0))
+    print(life_support_rating(oxygen, co2))
 
 
 if __name__ == '__main__':
