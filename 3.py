@@ -17,8 +17,8 @@ sample = [
 ]
 
 file_name = f'{os.path.basename(__file__).split(".")[0]}.txt'
-data = sample
-data = shared.get_data(file_name)
+DATA = sample
+DATA = shared.get_data(file_name)
 
 
 def transpose(matrix):
@@ -42,8 +42,8 @@ def power_consumption(gamma_epsilon):
     return int(gamma_epsilon['gamma'], 2) * int(gamma_epsilon['epsilon'], 2)
 
 
-def main():
-    print(power_consumption(get_gamma_epsilon_binary(data)))
+def main(data):
+    return power_consumption(get_gamma_epsilon_binary(data))
 
 
 def sum_column(index, matrix):
@@ -81,10 +81,10 @@ co2_criteria = new_criteria(lambda column_sum,
 rate_co2 = new_rater(co2_criteria)
 
 
-def main2():
+def main2(data):
     (oxygen, co2) = (rate_oxygen(data, 0), rate_co2(data, 0))
-    print(life_support_rating(oxygen, co2))
+    return life_support_rating(oxygen, co2)
 
 
 if __name__ == '__main__':
-    main2()
+    print(main2(DATA))
