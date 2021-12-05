@@ -27,17 +27,22 @@ async def solve():
         part_1 = await asyncio.wait_for(thread_solve(solver.main, puzzle_input), timeout=5)
         part_2 = await asyncio.wait_for(thread_solve(solver.main2, puzzle_input), timeout=5)
         response = jsonify(
-            {
+            category='success',
+            payload={
                 'part1': part_1,
                 'part2': part_2,
             }
         )
     except asyncio.TimeoutError:
         response = jsonify(
-            {
-                'part1': 'took',  # solver.main(puzzle_input),
-                'part2': 'too long'  # solver.main2(puzzle_input),
-            }
+            category='timeout',
+            payload='Uh oh! It took too long to solve this puzzle...',
+        )
+    except Exception as e:
+        print(f'Error: {e}')
+        response = jsonify(
+            category='failure',
+            payload='Oops! An error occurred while solving the puzzle.'
         )
 
     return response
