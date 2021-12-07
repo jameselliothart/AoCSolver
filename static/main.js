@@ -42,16 +42,15 @@ const solve = formData => {
         body: formData
     })
         .then(resp => resp.json())
-        .then(processMessage)
+        .then(CONTROLLER.process)
 }
 
-function newMessageProcessor() {
-    sw = newStopwatch(updateCalcTime)
+function newController(stopwatch) {
     var actions = {
-        'solve': payload => {sw.start(); solve(payload); },
-        'success': payload => { hideError(); updateAnswer(payload); sw.stop(); },
-        'timeout': payload => { showError(payload); updateAnswer(NO_ANSWER); sw.stop(); },
-        'failure': payload => { showError(payload); updateAnswer(NO_ANSWER); sw.stop(); },
+        'solve': payload => { stopwatch.start(); solve(payload); },
+        'success': payload => { hideError(); updateAnswer(payload); stopwatch.stop(); },
+        'timeout': payload => { showError(payload); updateAnswer(NO_ANSWER); stopwatch.stop(); },
+        'failure': payload => { showError(payload); updateAnswer(NO_ANSWER); stopwatch.stop(); },
         'reset': _ => { hideError(); updateAnswer(NO_ANSWER); resetForm(); updateCalcTime(0); },
         'unrecognized': category => console.error(`Unrecognized message category [${category}]!`),
     }
@@ -61,15 +60,11 @@ function newMessageProcessor() {
         action(message.payload)
     }
 
-    return {process: process}
+    return { process: process }
 
 }
 
-const PROCESSOR = newMessageProcessor()
-
-function processMessage(message) {
-    PROCESSOR.process(message)
-}
+const CONTROLLER = newController(newStopwatch(updateCalcTime))
 
 function addSubmit(ev) {
     ev.preventDefault()
@@ -77,7 +72,7 @@ function addSubmit(ev) {
         category: 'solve',
         payload: new FormData(this)
     }
-    processMessage(message)
+    CONTROLLER.process(message)
 }
 
 function addReset(ev) {
@@ -86,7 +81,7 @@ function addReset(ev) {
         'category': 'reset',
         'payload': '',
     }
-    processMessage(message)
+    CONTROLLER.process(message)
 }
 
 function main() {
