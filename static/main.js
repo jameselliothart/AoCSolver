@@ -11,15 +11,16 @@ function newStopwatch(displayer) {
     }
     function start() { running = true; inc(0) }
     function stop() { running = false }
+    function reset() { displayer(0) }
 
-    var sw = { stop: stop, start: start }
+    var sw = { stop: stop, start: start, reset: reset }
 
     return sw
 }
 
 function newController(stopwatch) {
-    const NO_ANSWER = { 'part1': '', 'part2': '' }
-    const NOOP = {category: 'noop', payload: ''}
+    const noAnswer = { 'part1': '', 'part2': '' }
+    const noop = { category: 'noop', payload: '' }
 
     const hideError = () => document.getElementById('errorSection').hidden = true
 
@@ -44,18 +45,18 @@ function newController(stopwatch) {
     }
 
     const actions = {
-        'solve': async payload => { stopwatch.start(); return await solve(payload); },
-        'success': payload => { hideError(); updateAnswer(payload); stopwatch.stop(); return NOOP; },
-        'timeout': payload => { showError(payload); updateAnswer(NO_ANSWER); stopwatch.stop(); return NOOP; },
-        'failure': payload => { showError(payload); updateAnswer(NO_ANSWER); stopwatch.stop(); return NOOP; },
-        'reset': _ => { hideError(); updateAnswer(NO_ANSWER); resetForm(); updateCalcTime(0); return NOOP; },
-        'unrecognized': category => {console.error(`Unrecognized message category [${category}]!`); return NOOP; },
+        solve: async payload => { stopwatch.start(); return await solve(payload); },
+        success: payload => { hideError(); updateAnswer(payload); stopwatch.stop(); return noop; },
+        timeout: payload => { showError(payload); updateAnswer(noAnswer); stopwatch.stop(); return noop; },
+        failure: payload => { showError(payload); updateAnswer(noAnswer); stopwatch.stop(); return noop; },
+        reset: _ => { hideError(); updateAnswer(noAnswer); resetForm(); stopwatch.reset(); return noop; },
+        unrecognized: category => { console.error(`Unrecognized message category [${category}]!`); return noop; },
     }
 
     async function process(message) {
         var action = actions[message.category] || function (_) { actions.unrecognized(message.category) }
         var result = await action(message.payload)
-        if (result.category != NOOP.category) {
+        if (result.category != noop.category) {
             process(result)
         }
     }
@@ -64,34 +65,32 @@ function newController(stopwatch) {
 
 }
 
-const updateCalcTime = ms => document.getElementById('calcTime').innerText = `${ms / 1000}s`
-
-const CONTROLLER = newController(newStopwatch(updateCalcTime))
-
-function addSubmit(ev) {
-    ev.preventDefault()
-    var message = {
-        category: 'solve',
-        payload: new FormData(this)
-    }
-    CONTROLLER.process(message)
-}
-
-function addReset(ev) {
-    ev.preventDefault()
-    message = {
-        'category': 'reset',
-        'payload': '',
-    }
-    CONTROLLER.process(message)
-}
-
 function main() {
-    var form = document.getElementById('solve')
-    form.addEventListener('submit', addSubmit)
+    const updateCalcTime = ms => document.getElementById('calcTime').innerText = `${ms / 1000}s`
 
-    var clear = document.getElementById('clear-button')
-    clear.addEventListener('click', addReset)
+    const controller = newController(newStopwatch(updateCalcTime))
+
+    function addSubmit(ev) {
+        ev.preventDefault()
+        var message = {
+            category: 'solve',
+            payload: new FormData(this)
+        }
+        controller.process(message)
+    }
+
+    function addReset(ev) {
+        ev.preventDefault()
+        message = {
+            'category': 'reset',
+            'payload': '',
+        }
+        controller.process(message)
+    }
+
+    document.getElementById('solve').addEventListener('submit', addSubmit)
+
+    document.getElementById('clear-button').addEventListener('click', addReset)
 }
 
 main()
