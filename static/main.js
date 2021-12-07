@@ -14,7 +14,27 @@ const showError = data => {
 
 const resetForm = () => document.getElementById('puzzleInput').value = ''
 
-function processMessage(message) {
+const updateCalcTime = ms => document.getElementById('calcTime').innerText = `${ms / 1000}s`
+
+function newStopwatch(displayer) {
+    var running = false
+
+    function inc(val) {
+        setTimeout(function () {
+            if (running) {
+                displayer(val++)
+                console.log(val)
+                inc(val)
+            }
+        }, 1)
+    }
+    function start() { running = true; inc(0) }
+    function stop() { running = false }
+
+    var sw = { stop: stop, start: start }
+
+    return sw
+}
     var actions = {
         'success': payload => { hideError(); updateAnswer(payload); },
         'timeout': payload => { showError(payload); updateAnswer(NO_ANSWER); },
