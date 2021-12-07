@@ -35,25 +35,49 @@ function newStopwatch(displayer) {
 
     return sw
 }
+
+const solve = formData => {
+    fetch('/solve', {
+        method: 'POST',
+        body: formData
+    })
+        .then(resp => resp.json())
+        .then(processMessage)
+}
+
+function newMessageProcessor() {
+    sw = newStopwatch(updateCalcTime)
     var actions = {
-        'success': payload => { hideError(); updateAnswer(payload); },
-        'timeout': payload => { showError(payload); updateAnswer(NO_ANSWER); },
-        'failure': payload => { showError(payload); updateAnswer(NO_ANSWER); },
-        'reset': _ => { hideError(); updateAnswer(NO_ANSWER); resetForm() },
+        'solve': payload => {sw.start(); solve(payload); },
+        'success': payload => { hideError(); updateAnswer(payload); sw.stop(); },
+        'timeout': payload => { showError(payload); updateAnswer(NO_ANSWER); sw.stop(); },
+        'failure': payload => { showError(payload); updateAnswer(NO_ANSWER); sw.stop(); },
+        'reset': _ => { hideError(); updateAnswer(NO_ANSWER); resetForm(); updateCalcTime(0); },
         'unrecognized': category => console.error(`Unrecognized message category [${category}]!`),
     }
-    var action = actions[message.category] || function (_) { actions.unrecognized(message.category) }
-    action(message.payload)
+
+    function process(message) {
+        var action = actions[message.category] || function (_) { actions.unrecognized(message.category) }
+        action(message.payload)
+    }
+
+    return {process: process}
+
+}
+
+const PROCESSOR = newMessageProcessor()
+
+function processMessage(message) {
+    PROCESSOR.process(message)
 }
 
 function addSubmit(ev) {
     ev.preventDefault()
-    fetch('/solve', {
-        method: 'POST',
-        body: new FormData(this)
-    })
-        .then(resp => resp.json())
-        .then(processMessage)
+    var message = {
+        category: 'solve',
+        payload: new FormData(this)
+    }
+    processMessage(message)
 }
 
 function addReset(ev) {
