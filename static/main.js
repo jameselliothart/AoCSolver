@@ -1,21 +1,3 @@
-const NO_ANSWER = { 'part1': '', 'part2': '' }
-
-const hideError = () => document.getElementById('errorSection').hidden = true
-
-const updateAnswer = data => {
-    document.getElementById('solution1').innerText = data.part1
-    document.getElementById('solution2').innerText = data.part2
-}
-
-const showError = data => {
-    document.getElementById('errorSection').hidden = false
-    document.getElementById('errorText').innerText = data
-}
-
-const resetForm = () => document.getElementById('puzzleInput').value = ''
-
-const updateCalcTime = ms => document.getElementById('calcTime').innerText = `${ms / 1000}s`
-
 function newStopwatch(displayer) {
     var running = false
 
@@ -23,7 +5,6 @@ function newStopwatch(displayer) {
         setTimeout(function () {
             if (running) {
                 displayer(val++)
-                console.log(val)
                 inc(val)
             }
         }, 1)
@@ -36,33 +17,54 @@ function newStopwatch(displayer) {
     return sw
 }
 
-const solve = formData => {
-    fetch('/solve', {
-        method: 'POST',
-        body: formData
-    })
-        .then(resp => resp.json())
-        .then(CONTROLLER.process)
-}
-
 function newController(stopwatch) {
-    var actions = {
-        'solve': payload => { stopwatch.start(); solve(payload); },
-        'success': payload => { hideError(); updateAnswer(payload); stopwatch.stop(); },
-        'timeout': payload => { showError(payload); updateAnswer(NO_ANSWER); stopwatch.stop(); },
-        'failure': payload => { showError(payload); updateAnswer(NO_ANSWER); stopwatch.stop(); },
-        'reset': _ => { hideError(); updateAnswer(NO_ANSWER); resetForm(); updateCalcTime(0); },
-        'unrecognized': category => console.error(`Unrecognized message category [${category}]!`),
+    const NO_ANSWER = { 'part1': '', 'part2': '' }
+    const NOOP = {category: 'noop', payload: ''}
+
+    const hideError = () => document.getElementById('errorSection').hidden = true
+
+    const updateAnswer = data => {
+        document.getElementById('solution1').innerText = data.part1
+        document.getElementById('solution2').innerText = data.part2
     }
 
-    function process(message) {
+    const showError = data => {
+        document.getElementById('errorSection').hidden = false
+        document.getElementById('errorText').innerText = data
+    }
+
+    const resetForm = () => document.getElementById('puzzleInput').value = ''
+
+    const solve = async formData => {
+        const resp = await fetch('/solve', {
+            method: 'POST',
+            body: formData
+        })
+        return await resp.json()
+    }
+
+    const actions = {
+        'solve': async payload => { stopwatch.start(); return await solve(payload); },
+        'success': payload => { hideError(); updateAnswer(payload); stopwatch.stop(); return NOOP; },
+        'timeout': payload => { showError(payload); updateAnswer(NO_ANSWER); stopwatch.stop(); return NOOP; },
+        'failure': payload => { showError(payload); updateAnswer(NO_ANSWER); stopwatch.stop(); return NOOP; },
+        'reset': _ => { hideError(); updateAnswer(NO_ANSWER); resetForm(); updateCalcTime(0); return NOOP; },
+        'unrecognized': category => {console.error(`Unrecognized message category [${category}]!`); return NOOP; },
+    }
+
+    async function process(message) {
         var action = actions[message.category] || function (_) { actions.unrecognized(message.category) }
-        action(message.payload)
+        var result = await action(message.payload)
+        if (result.category != NOOP.category) {
+            process(result)
+        }
     }
 
     return { process: process }
 
 }
+
+const updateCalcTime = ms => document.getElementById('calcTime').innerText = `${ms / 1000}s`
 
 const CONTROLLER = newController(newStopwatch(updateCalcTime))
 
