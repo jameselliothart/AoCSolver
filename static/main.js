@@ -3,17 +3,13 @@ const NO_ANSWER = { 'part1': '', 'part2': '' }
 const hideError = () => document.getElementById('errorSection').hidden = true
 
 const updateAnswer = data => {
-    var part1 = document.getElementById('solution1');
-    var part2 = document.getElementById('solution2');
-    part1.innerText = data.part1
-    part2.innerText = data.part2
+    document.getElementById('solution1').innerText = data.part1
+    document.getElementById('solution2').innerText = data.part2
 }
 
 const showError = data => {
-    var errorSection = document.getElementById('errorSection')
-    var errorText = document.getElementById('errorText')
-    errorSection.hidden = false
-    errorText.innerText = data
+    document.getElementById('errorSection').hidden = false
+    document.getElementById('errorText').innerText = data
 }
 
 const resetForm = () => document.getElementById('puzzleInput').value = ''
