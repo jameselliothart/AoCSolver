@@ -65,10 +65,8 @@ function newController(stopwatch) {
 
 }
 
-function main() {
-    const updateCalcTime = ms => document.getElementById('calcTime').innerText = `${ms / 1000}s`
-
-    const controller = newController(newStopwatch(updateCalcTime))
+function main(controller) {
+    const _controller = controller
 
     function addSubmit(ev) {
         ev.preventDefault()
@@ -76,7 +74,7 @@ function main() {
             category: 'solve',
             payload: new FormData(this)
         }
-        controller.process(message)
+        _controller.process(message)
     }
 
     function addReset(ev) {
@@ -85,7 +83,7 @@ function main() {
             'category': 'reset',
             'payload': '',
         }
-        controller.process(message)
+        _controller.process(message)
     }
 
     document.getElementById('solve').addEventListener('submit', addSubmit)
@@ -93,4 +91,5 @@ function main() {
     document.getElementById('clear-button').addEventListener('click', addReset)
 }
 
-main()
+const updateCalcTime = ms => document.getElementById('calcTime').innerText = `${ms / 1000}s`
+main(newController(newStopwatch(updateCalcTime)))
