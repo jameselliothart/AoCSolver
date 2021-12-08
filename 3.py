@@ -42,7 +42,7 @@ def power_consumption(gamma_epsilon):
     return int(gamma_epsilon['gamma'], 2) * int(gamma_epsilon['epsilon'], 2)
 
 
-def main(data):
+def part_one(data):
     return power_consumption(get_gamma_epsilon_binary(data))
 
 
@@ -81,10 +81,11 @@ co2_criteria = new_criteria(lambda column_sum,
 rate_co2 = new_rater(co2_criteria)
 
 
-def main2(data):
+def part_two(data):
     (oxygen, co2) = (rate_oxygen(data, 0), rate_co2(data, 0))
     return life_support_rating(oxygen, co2)
 
 
 if __name__ == '__main__':
-    print(main2(DATA))
+    print(part_one(DATA))
+    print(part_two(DATA))

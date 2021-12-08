@@ -10,14 +10,14 @@ DATA = sample
 DATA = shared.get_data(file_name)
 
 
-def part_1(data):
+def part_one(data):
     return data
 
 
-def part_2(data):
+def part_two(data):
     return data
 
 
 if __name__ == '__main__':
-    print(f'Part 1: {part_1(DATA)}')
-    print(f'Part 2: {part_2(DATA)}')
+    print(f'Part 1: {part_one(DATA)}')
+    print(f'Part 2: {part_two(DATA)}')

@@ -24,8 +24,8 @@ async def solve():
         request.form.get('year', 2021), request.form.get('day', 1), request.form.get('puzzleInput').split())
     solver = import_module(day)
     try:
-        part_1 = await asyncio.wait_for(thread_solve(solver.main, puzzle_input), timeout=5)
-        part_2 = await asyncio.wait_for(thread_solve(solver.main2, puzzle_input), timeout=5)
+        part_1 = await asyncio.wait_for(thread_solve(solver.part_one, puzzle_input), timeout=5)
+        part_2 = await asyncio.wait_for(thread_solve(solver.part_two, puzzle_input), timeout=5)
         response = jsonify(
             category='success',
             payload={
