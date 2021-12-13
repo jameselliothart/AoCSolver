@@ -18,6 +18,11 @@ def index():
     return render_template('index.html')
 
 
+@app.get('/test')
+def test():
+    return render_template('test.html')
+
+
 @app.post('/solve')
 async def solve():
     (_, day, puzzle_input) = (
