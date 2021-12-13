@@ -79,9 +79,9 @@ function main(controller) {
 
     function addReset(ev) {
         ev.preventDefault()
-        message = {
-            'category': 'reset',
-            'payload': '',
+        var message = {
+            category: 'reset',
+            payload: '',
         }
         _controller.process(message)
     }
