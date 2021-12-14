@@ -1,14 +1,14 @@
-import { actions } from "./actions.js";
+import { defaultActions, noop, newTerminatingAction } from "./actions.js";
 
 export function newController(actions) {
     const _actions = actions
 
-    const invalidAction = category => { console.warn(`Unrecognized message category [${category}]!`); return _actions.noop; }
+    const invalidAction = newTerminatingAction(category => console.warn(`Unrecognized message category [${category}]!`))
 
     async function process(message) {
         var action = _actions[message.category] || function (_) { return invalidAction(message.category) }
         var result = await action(message.payload)
-        if (result.category != _actions.noop.category) {
+        if (result.category != noop.category) {
             process(result)
         }
     }
@@ -17,4 +17,4 @@ export function newController(actions) {
 
 }
 
-export function defaultController() { return newController(actions) }
+export function defaultController() { return newController(defaultActions) }

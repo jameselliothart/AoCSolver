@@ -1,6 +1,6 @@
 import { newStopwatch } from "./stopwatch.js";
 import { newController } from "./controller.js";
-import { noop } from "./actions.js";
+import { newTerminatingAction } from "./actions.js";
 
 
 QUnit.module('stopwatch should', () => {
@@ -20,7 +20,7 @@ QUnit.module('stopwatch should', () => {
 
 QUnit.module('controller should', () => {
     QUnit.test('gracefully ignore unrecognized message categories', async assert => {
-        var controller = newController({ noop: noop })
+        var controller = newController({})
         try {
             await controller.process({ category: 'nonsense', payload: '' })
             assert.ok(true)
@@ -30,7 +30,7 @@ QUnit.module('controller should', () => {
     })
     QUnit.test('dispatch actions based on message category', async assert => {
         var counter = { count: 0 }
-        var actions = { noop: noop, updateCounter: payload => { counter.count = payload; return noop; } }
+        var actions = { updateCounter: newTerminatingAction(payload => counter.count = payload) }
         var message = { category: 'updateCounter', payload: 10 }
         var controller = newController(actions)
         await controller.process(message)

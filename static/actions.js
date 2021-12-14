@@ -27,12 +27,18 @@ const solve = async formData => {
 
 const noAnswer = { part1: '', part2: '' }
 export const noop = { category: 'noop', payload: '' }
+export function newTerminatingAction(fn) {
+    const action = payload => {
+        fn(payload)
+        return noop
+    }
+    return action
+}
 
-export const actions = {
-    noop: noop,
+export const defaultActions = {
     solve: async payload => { sw.start(); return await solve(payload); },
-    success: payload => { hideError(); updateAnswer(payload); sw.stop(); return noop; },
-    timeout: payload => { showError(payload); updateAnswer(noAnswer); sw.stop(); return noop; },
-    failure: payload => { showError(payload); updateAnswer(noAnswer); sw.stop(); return noop; },
-    reset: _ => { hideError(); updateAnswer(noAnswer); resetForm(); sw.reset(); return noop; },
+    success: newTerminatingAction(payload => { hideError(); updateAnswer(payload); sw.stop(); }),
+    timeout: newTerminatingAction(payload => { showError(payload); updateAnswer(noAnswer); sw.stop(); }),
+    failure: newTerminatingAction(payload => { showError(payload); updateAnswer(noAnswer); sw.stop(); }),
+    reset: newTerminatingAction(_ => { hideError(); updateAnswer(noAnswer); resetForm(); sw.reset(); }),
 }
