@@ -28,4 +28,12 @@ QUnit.module('controller should', () => {
             assert.ok(false, `Exception was thrown: ${e}`)
         }
     })
+    QUnit.test('dispatch actions based on message category', async assert => {
+        var counter = {count:0}
+        var actions = {noop:noop, updateCounter: payload => {counter.count = payload; return noop;}}
+        var message = {category:'updateCounter', payload:10}
+        var controller = newController(actions)
+        await controller.process(message)
+        assert.strictEqual(counter.count, message.payload, 'Check message processing')
+    })
 })
