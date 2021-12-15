@@ -24,7 +24,7 @@ async def thread_solve(solver, data):
 
 def get_form_data(form):
     (year, day, puzzle_input) = (int(form.get('year')),
-                                 int(form.get('day')), form.get('puzzleInput').split())
+                                 int(form.get('day')), form.get('puzzleInput').splitlines())
     if year in [2021] and day in range(26):
         return Ok((year, day, puzzle_input))
     return Failure(f'Year/day {year}/{day} outside of accepted range 2021/1-25')
