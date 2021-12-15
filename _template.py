@@ -11,11 +11,11 @@ DATA = file_io.get_data(file_name)
 
 
 def part_one(data):
-    return data
+    pass
 
 
 def part_two(data):
-    return data
+    pass
 
 
 if __name__ == '__main__':
