@@ -1,3 +1,4 @@
+from traceback import print_exc
 from collections import namedtuple
 from functools import singledispatch
 from flask import Flask, request
@@ -67,7 +68,8 @@ async def get_response(req: Request):
             payload='Uh oh! It took too long to solve this puzzle...',
         )
     except Exception as e:
-        print(f'Error: {e}')
+        print(f'An error occurred: {e}')
+        print_exc()
         response = jsonify(
             category='failure',
             payload='Oops! An error occurred while solving the puzzle.'
