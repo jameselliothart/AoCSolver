@@ -92,12 +92,23 @@ def part_one(data):
     return play(boards, numbers)
 
 
+def play_two(boards: List[Board], numbers: List[int]):
+    for number in numbers:
+        for board in boards:
+            board.mark(number)
+        boards = [board for board in boards if not board.is_winner()] if len(boards) > 1 else boards
+        if len(boards) == 1 and boards[0].is_winner():
+            return boards[0].sum_unmarked(), number, boards[0].sum_unmarked() * number
+    return None
+
+
 def part_two(data):
-    return data
+    [raw_numbers, _, *raw_boards] = data
+    numbers = get_numbers(raw_numbers)
+    boards = list(get_boards(raw_boards))
+    return play_two(boards, numbers)
 
 
 if __name__ == '__main__':
     print(f'Part 1: {part_one(DATA)}')
-    # print(f'Part 2: {part_two(DATA)}')
-    # b = get_boards
-    # print(b.sum_unmarked())
+    print(f'Part 2: {part_two(DATA)}')
