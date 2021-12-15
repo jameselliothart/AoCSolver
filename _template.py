@@ -1,5 +1,5 @@
 import os
-import shared
+import file_io
 
 sample = [
 
@@ -7,7 +7,7 @@ sample = [
 
 file_name = f'{os.path.basename(__file__).split(".")[0]}.txt'
 DATA = sample
-DATA = shared.get_data(file_name)
+DATA = file_io.get_data(file_name)
 
 
 def part_one(data):
