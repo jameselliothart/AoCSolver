@@ -1,4 +1,4 @@
-import shared
+import file_io
 import os
 from functools import reduce
 from dataclasses import dataclass, replace
@@ -75,7 +75,7 @@ def move(position, command: Command):
 def main():
     file_name = f'{os.path.basename(__file__).split(".")[0]}.txt'
     data = [to_command(x) for x in sample]
-    data = [to_command(x) for x in shared.get_data(file_name)]
+    data = [to_command(x) for x in file_io.get_data(file_name)]
     print(position_number(reduce(move, data, Position(0, 0))))
 
 
