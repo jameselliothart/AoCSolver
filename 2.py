@@ -61,6 +61,15 @@ def to_command(line):
     [direction, amount] = line.split(' ')
     return Command(direction, int(amount))
 
+def move_1(position, command: Command):
+    direction_to_fn = {
+        'forward': forward,
+        'up': up,
+        'down': down,
+    }
+    fn = direction_to_fn[command.direction]
+    return fn(position, command.amount)
+
 
 def move(position, command: Command):
     direction_to_fn = {
@@ -72,12 +81,17 @@ def move(position, command: Command):
     return fn(position, command.amount)
 
 
-def main():
-    file_name = f'{os.path.basename(__file__).split(".")[0]}.txt'
-    data = [to_command(x) for x in sample]
-    data = [to_command(x) for x in file_io.get_data(file_name)]
-    print(position_number(reduce(move, data, Position(0, 0))))
+def part_one(data):
+    data = [to_command(x) for x in data]
+    return position_number(reduce(move_1, data, Position(0, 0)))
+
+def part_two(data):
+    data = [to_command(x) for x in data]
+    return position_number(reduce(move, data, Position(0, 0)))
 
 
 if __name__ == '__main__':
-    main()
+    file_name = f'{os.path.basename(__file__).split(".")[0]}.txt'
+    DATA = file_io.get_data(file_name)
+    print(part_one(DATA))
+    print(part_two(DATA))
