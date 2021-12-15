@@ -1,4 +1,3 @@
-from traceback import print_exc
 from collections import namedtuple
 from functools import singledispatch
 from flask import Flask, request
