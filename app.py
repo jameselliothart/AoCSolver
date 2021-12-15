@@ -1,11 +1,19 @@
+from collections import namedtuple
+from functools import singledispatch
 from flask import Flask, request
 from flask.json import jsonify
 from flask.templating import render_template
 from importlib import import_module
 import asyncio
 
+from werkzeug.wrappers.request import Request
+
 
 app = Flask(__name__)
+
+
+Ok = namedtuple('Ok', 'data')
+Failure = namedtuple('Failure', 'message')
 
 
 async def thread_solve(solver, data):
@@ -13,31 +21,46 @@ async def thread_solve(solver, data):
     return result
 
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    return render_template('index.html')
+def get_form_data(form):
+    (year, day, puzzle_input) = (int(form.get('year')),
+                                 int(form.get('day')), form.get('puzzleInput').split())
+    if year in [2021] and day in range(26):
+        return Ok((year, day, puzzle_input))
+    return Failure(f'Year/day {year}/{day} outside of accepted range 2021/1-25')
 
 
-@app.get('/test')
-def test():
-    return render_template('test.html')
+@singledispatch
+def solve_puzzle(form_result):
+    raise NotImplementedError(f'Unrecognized form result {form_result=}')
 
 
-@app.post('/solve')
-async def solve():
-    (_, day, puzzle_input) = (
-        request.form.get('year', 2021), request.form.get('day', 1), request.form.get('puzzleInput').split())
-    solver = import_module(day)
+@solve_puzzle.register
+def _(form_result: Failure):
+    return jsonify(
+        category='failure',
+        payload=f'Error: {form_result.message}',
+    )
+
+
+@solve_puzzle.register
+async def _(form_result: Ok):
+    (_, day, puzzle_input) = form_result.data
+    solver = import_module(f'{day}')
+    part_1 = await asyncio.wait_for(thread_solve(solver.part_one, puzzle_input), timeout=5)
+    part_2 = await asyncio.wait_for(thread_solve(solver.part_two, puzzle_input), timeout=5)
+    return jsonify(
+        category='success',
+        payload={
+            'part1': part_1,
+            'part2': part_2,
+        }
+    )
+
+
+async def get_response(req: Request):
     try:
-        part_1 = await asyncio.wait_for(thread_solve(solver.part_one, puzzle_input), timeout=5)
-        part_2 = await asyncio.wait_for(thread_solve(solver.part_two, puzzle_input), timeout=5)
-        response = jsonify(
-            category='success',
-            payload={
-                'part1': part_1,
-                'part2': part_2,
-            }
-        )
+        form_data = get_form_data(req.form)
+        response = await solve_puzzle(form_data)
     except asyncio.TimeoutError:
         response = jsonify(
             category='timeout',
@@ -51,6 +74,21 @@ async def solve():
         )
 
     return response
+
+
+@app.get('/')
+def index():
+    return render_template('index.html')
+
+
+@app.get('/test')
+def test():
+    return render_template('test.html')
+
+
+@app.post('/solve')
+async def solve():
+    return await get_response(request)
 
 
 if __name__ == '__main__':
