@@ -68,8 +68,7 @@ async def get_response(req: Request):
             payload='Uh oh! It took too long to solve this puzzle...',
         )
     except Exception as e:
-        print(f'An error occurred: {e}')
-        print_exc()
+        app.log_exception(e)
         response = jsonify(
             category='failure',
             payload='Oops! An error occurred while solving the puzzle.'
