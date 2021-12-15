@@ -43,12 +43,18 @@ class SlidingWindow():
         return item
 
 
-def main():
-    file_name = '1.txt'
-    data = sample
-    data = [int(x) for x in file_io.get_data(file_name)]
-    print(increases(get_comparer(list(SlidingWindow(data)))))
+def part_one(data):
+    data = [int(x) for x in data]
+    return increases(get_comparer(data))
+
+
+def part_two(data):
+    data = [int(x) for x in data]
+    return increases(get_comparer(list(SlidingWindow(data))))
 
 
 if __name__ == '__main__':
-    main()
+    file_name = '1.txt'
+    DATA = file_io.get_data(file_name)
+    print(part_one(DATA))
+    print(part_two(DATA))
