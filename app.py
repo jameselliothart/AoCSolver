@@ -3,6 +3,7 @@ from functools import singledispatch
 from flask import Flask, request
 from flask.json import jsonify
 from flask.templating import render_template
+from flask.logging import create_logger
 from importlib import import_module
 import asyncio
 
@@ -10,6 +11,7 @@ from werkzeug.wrappers.request import Request
 
 
 app = Flask(__name__)
+LOG = create_logger(app)
 
 
 Ok = namedtuple('Ok', 'data')
@@ -62,6 +64,7 @@ async def get_response(req: Request):
         form_data = get_form_data(req.form)
         response = await solve_puzzle(form_data)
     except asyncio.TimeoutError:
+        LOG.warning('Puzzle took too long to solve!', exc_info=1)
         response = jsonify(
             category='timeout',
             payload='Uh oh! It took too long to solve this puzzle...',
