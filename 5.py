@@ -62,8 +62,9 @@ def part_one(data):
         if to_vent_line(line).is_horizontal() or to_vent_line(line).is_vertical()
     ]
     coverages = [non_diagonal_coverage_of(line) for line in vent_lines]
-    coverage_counts = Counter(point for coverage in coverages for point in coverage)
-    dangerous_areas = {k:v for k,v in coverage_counts.items() if v > 1}
+    coverage_counts = Counter(
+        point for coverage in coverages for point in coverage)
+    dangerous_areas = {k: v for k, v in coverage_counts.items() if v > 1}
 
     return len(dangerous_areas)
 
