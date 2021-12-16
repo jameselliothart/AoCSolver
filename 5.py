@@ -82,15 +82,15 @@ def move_toward(a: Point, b: Point):
 
 
 def coverage_of(line: VentLine):
-    return list(move_toward(line.point_one, line.point_two))
+    return move_toward(line.point_one, line.point_two)
 
 def part_two(data):
     vent_lines = [
         to_vent_line(line) for line in data
     ]
-    coverages = [coverage_of(line) for line in vent_lines]
-    coverage_counts = Counter(
-        point for coverage in coverages for point in coverage)
+    coverage_counts = Counter()
+    for line in vent_lines:
+        coverage_counts.update(coverage_of(line))
     dangerous_areas = {k: v for k, v in coverage_counts.items() if v > 1}
 
     return len(dangerous_areas)
@@ -99,4 +99,3 @@ def part_two(data):
 if __name__ == '__main__':
     print(f'Part 1: {part_one(DATA)}')
     print(f'Part 2: {part_two(DATA)}')
-    # print(coverage_of(VentLine(point_one=Point(x=0, y=9), point_two=Point(x=5, y=9))))
