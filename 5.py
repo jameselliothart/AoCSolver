@@ -69,8 +69,31 @@ def part_one(data):
     return len(dangerous_areas)
 
 
+def inc_toward(a, b):
+    if a == b:
+        return b
+    return a + 1 if b > a else a - 1
+
+def move_toward(a: Point, b: Point):
+    yield a
+    if a == b:
+        return StopIteration
+    yield from move_toward(Point(inc_toward(a.x, b.x), inc_toward(a.y, b.y)), b)
+
+
+def coverage_of(line: VentLine):
+    return list(move_toward(line.point_one, line.point_two))
+
 def part_two(data):
-    pass
+    vent_lines = [
+        to_vent_line(line) for line in data
+    ]
+    coverages = [coverage_of(line) for line in vent_lines]
+    coverage_counts = Counter(
+        point for coverage in coverages for point in coverage)
+    dangerous_areas = {k: v for k, v in coverage_counts.items() if v > 1}
+
+    return len(dangerous_areas)
 
 
 if __name__ == '__main__':
