@@ -14,8 +14,8 @@ def cost_to_move(starting: int, end: int):
     return abs(starting - end)
 
 
-def get_fuel_costs(positions: list[int], destination: int):
-    return [cost_to_move(position, destination) for position in positions]
+def get_fuel_costs(cost_fn, positions: list[int], destination: int):
+    return [cost_fn(position, destination) for position in positions]
 
 
 def total_cost(fuel_costs: list[int]):
@@ -26,7 +26,7 @@ def part_one(data):
     [positions_raw, *_] = data
     positions = [int(p) for p in positions_raw.split(',')]
     possibilities = [
-        (destination, total_cost(get_fuel_costs(positions, destination)))
+        (destination, total_cost(get_fuel_costs(cost_to_move, positions, destination)))
         for destination in range(max(positions) + 1)
     ]
     return min(possibilities, key=lambda x: x[1])
