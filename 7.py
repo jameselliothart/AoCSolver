@@ -35,8 +35,14 @@ def solve(cost_fn, data):
 def part_one(data):
     return solve(cost_to_move, data)
 
+
+def cost_to_move_two(starting: int, end: int):
+    distance = abs(starting - end)
+    return (distance * (distance + 1)) / 2
+
+
 def part_two(data):
-    pass
+    return solve(cost_to_move_two, data)
 
 
 if __name__ == '__main__':
